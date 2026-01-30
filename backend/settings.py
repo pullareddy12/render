@@ -1,13 +1,11 @@
 from pathlib import Path
 import os
-from dotenv import load_dotenv
 import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-load_dotenv(BASE_DIR / ".env")
 
-SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure-change-this")
-DEBUG = os.getenv("DEBUG", "False") == "True"
+SECRET_KEY = os.environ.get("SECRET_KEY")
+DEBUG = os.environ.get("DEBUG", "False") == "True"
 
 ALLOWED_HOSTS = ["localhost", "127.0.0.1", ".onrender.com"]
 
@@ -54,9 +52,13 @@ TEMPLATES = [
     },
 ]
 
+DATABASE_URL = os.environ.get("DATABASE_URL")
+if not DATABASE_URL:
+    raise Exception("DATABASE_URL is not set")
+
 DATABASES = {
     "default": dj_database_url.parse(
-        os.getenv("DATABASE_URL"),
+        DATABASE_URL,
         conn_max_age=600,
         ssl_require=True,
     )
@@ -72,14 +74,14 @@ REST_FRAMEWORK = {
     ],
 }
 
-TELEGRAM_CAREER_BOT_TOKEN = os.getenv("TELEGRAM_CAREER_BOT_TOKEN")
-TELEGRAM_CAREER_CHAT_ID = os.getenv("TELEGRAM_CAREER_CHAT_ID")
+TELEGRAM_CAREER_BOT_TOKEN = os.environ.get("TELEGRAM_CAREER_BOT_TOKEN")
+TELEGRAM_CAREER_CHAT_ID = os.environ.get("TELEGRAM_CAREER_CHAT_ID")
 
-TELEGRAM_CONTACT_BOT_TOKEN = os.getenv("TELEGRAM_CONTACT_BOT_TOKEN")
-TELEGRAM_CONTACT_CHAT_ID = os.getenv("TELEGRAM_CONTACT_CHAT_ID")
+TELEGRAM_CONTACT_BOT_TOKEN = os.environ.get("TELEGRAM_CONTACT_BOT_TOKEN")
+TELEGRAM_CONTACT_CHAT_ID = os.environ.get("TELEGRAM_CONTACT_CHAT_ID")
 
-TELEGRAM_CPU_BOT_TOKEN = os.getenv("TELEGRAM_CPU_BOT_TOKEN")
-TELEGRAM_CPU_CHAT_ID = os.getenv("TELEGRAM_CPU_CHAT_ID")
+TELEGRAM_CPU_BOT_TOKEN = os.environ.get("TELEGRAM_CPU_BOT_TOKEN")
+TELEGRAM_CPU_CHAT_ID = os.environ.get("TELEGRAM_CPU_CHAT_ID")
 
 LANGUAGE_CODE = "en-us"
 TIME_ZONE = "UTC"
