@@ -1,4 +1,5 @@
 from django.urls import path
+from .views import HackathonRegistrationCreate  
 from .views import (
     CareerApplicationCreate,
     ContactMessageCreate,
@@ -20,4 +21,12 @@ urlpatterns = [
     path("giveback/", CommunityItemListAPIView.as_view()),
     path("inquiry/", create_inquiry),
     path("inquiry/<int:pk>/", create_inquiry),
+
+]
+from django.urls import path
+from .views import HackathonRegistrationCreate
+
+urlpatterns = [
+    path("hackathon/", HackathonRegistrationCreate.as_view()),
+    path("hackathon/<int:pk>/", HackathonRegistrationCreate.as_view()),
 ]

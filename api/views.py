@@ -196,3 +196,38 @@ class CommunityItemListAPIView(ListAPIView):
 
     def get_queryset(self):
         return CommunityItem.objects.filter(section="giveback").order_by("-created_at")
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from django.shortcuts import get_object_or_404
+
+from .models import HackathonTeam
+from .serializers import HackathonTeamSerializer, HackathonRegistrationSerializer
+
+
+class HackathonRegistrationCreate(APIView):
+    # GET: list all registrations (teams + participants)
+    def get(self, request):
+        teams = HackathonTeam.objects.all().order_by("-created_at")
+        serializer = HackathonTeamSerializer(teams, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    # POST: create team + leader + members
+    def post(self, request):
+        serializer = HackathonRegistrationSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        team = serializer.save()
+        return Response(
+            {"message": "Hackathon registration successful", "team_id": team.id},
+            status=status.HTTP_201_CREATED
+        )
+
+    # DELETE: delete a team (and its participants)
+    def delete(self, request, pk):
+        team = get_object_or_404(HackathonTeam, pk=pk)
+        team.delete()
+        return Response(
+            {"message": "Hackathon registration deleted"},
+            status=status.HTTP_204_NO_CONTENT
+        )

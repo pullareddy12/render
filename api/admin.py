@@ -108,4 +108,21 @@ class CommunityItemAdmin(admin.ModelAdmin):
 
     class Media:
         js = ("admin/js/community_toggle.js",)
-   
+
+from django.contrib import admin
+from .models import HackathonTeam, HackathonParticipant
+
+
+@admin.register(HackathonTeam)
+class HackathonTeamAdmin(admin.ModelAdmin):
+    list_display = ("id", "team_name", "total_participants", "created_at")
+    search_fields = ("team_name",)
+    ordering = ("-created_at",)
+
+
+@admin.register(HackathonParticipant)
+class HackathonParticipantAdmin(admin.ModelAdmin):
+    list_display = ("id", "team", "role", "full_name", "email", "phone", "branch", "section", "year")
+    search_fields = ("full_name", "email", "phone", "team__team_name")
+    list_filter = ("role", "branch", "section", "year")
+    ordering = ("-id",)

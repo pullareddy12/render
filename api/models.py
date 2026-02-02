@@ -169,3 +169,37 @@ class CpuInquiry(models.Model):
 
     def __str__(self):
         return self.full_name
+
+from django.db import models
+
+
+class HackathonTeam(models.Model):
+    team_name = models.CharField(max_length=150)
+    total_participants = models.PositiveIntegerField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.team_name
+
+
+class HackathonParticipant(models.Model):
+    ROLE_CHOICES = (
+        ("LEADER", "Leader"),
+        ("MEMBER", "Member"),
+    )
+
+    team = models.ForeignKey(
+        HackathonTeam,
+        on_delete=models.CASCADE,
+        related_name="participants"
+    )
+    role = models.CharField(max_length=10, choices=ROLE_CHOICES)
+    full_name = models.CharField(max_length=100)
+    email = models.EmailField()
+    phone = models.CharField(max_length=15)
+    branch = models.CharField(max_length=50)
+    section = models.CharField(max_length=10)
+    year = models.CharField(max_length=10)
+
+    def __str__(self):
+        return f"{self.full_name} ({self.role})"

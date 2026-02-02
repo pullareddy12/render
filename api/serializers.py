@@ -65,3 +65,75 @@ class CpuInquirySerializer(serializers.ModelSerializer):
     class Meta:
         model = CpuInquiry
         fields = "__all__"
+
+from rest_framework import serializers
+from .models import HackathonTeam, HackathonParticipant
+
+
+class HackathonParticipantInputSerializer(serializers.Serializer):
+    full_name = serializers.CharField(max_length=100)
+    email = serializers.EmailField()
+    phone = serializers.CharField(max_length=15)
+    branch = serializers.CharField(max_length=50)
+    section = serializers.CharField(max_length=10)
+    year = serializers.CharField(max_length=10)
+
+
+class HackathonParticipantSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = HackathonParticipant
+        fields = "__all__"
+
+
+class HackathonTeamSerializer(serializers.ModelSerializer):
+    participants = HackathonParticipantSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = HackathonTeam
+        fields = ["id", "team_name", "total_participants", "created_at", "participants"]
+
+
+class HackathonRegistrationSerializer(serializers.Serializer):
+    # ✅ NOTE: these keys MUST match React payload
+    team_name = serializers.CharField(max_length=150)
+    total_participants = serializers.IntegerField(min_value=2, max_value=6)
+    leader = HackathonParticipantInputSerializer()
+    members = HackathonParticipantInputSerializer(many=True, required=False)
+
+    def validate(self, attrs):
+        members = attrs.get("members", [])
+        expected_total = 1 + len(members)
+
+        if attrs["total_participants"] != expected_total:
+            raise serializers.ValidationError({
+                "total_participants": f"Expected {expected_total} (leader + members)."
+            })
+
+        if expected_total < 2 or expected_total > 6:
+            raise serializers.ValidationError("Team size must be 2–6 including leader.")
+
+        return attrs
+
+    def create(self, validated_data):
+        leader_data = validated_data["leader"]
+        members_data = validated_data.get("members", [])
+
+        team = HackathonTeam.objects.create(
+            team_name=validated_data["team_name"],
+            total_participants=validated_data["total_participants"],
+        )
+
+        HackathonParticipant.objects.create(
+            team=team,
+            role="LEADER",
+            **leader_data
+        )
+
+        for member in members_data:
+            HackathonParticipant.objects.create(
+                team=team,
+                role="MEMBER",
+                **member
+            )
+
+        return team
